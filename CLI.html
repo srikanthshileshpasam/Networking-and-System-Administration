@@ -1,0 +1,69 @@
+<!-- CLI code file for Network and System Administration CA 1 -->
+
+<!-- Logging in to the VM -->
+ssh srikanthshileshpasam@104.40.231.66
+
+<!-- Installing Docker on VM -->
+sudo apt install docker.io
+
+<!-- Updating VM -->
+sudo apt-get update
+
+<!-- Starting Docker-->
+sudo systemctl start docker
+
+<!-- Configuring Docker to run at system startup -->
+sudo systemctl enable docker
+
+<!-- Installing httpd image in Docker -->
+docker pull httpd
+
+<!-- Checking the Docker images on the VM -->
+sudo docker images
+
+<!-- Checking the running Docker images -->
+sudo docker ps
+
+<!-- Checking the running and stopped Docker images -->
+sudo docker ps -a
+
+<!-- Assigning port 80 of the VM to the port 80 of the Docker Apache server-->
+sudo docker run -p 80:80 httpd
+
+<!-- Adding Key for Jenkins repository -->
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+<!-- Adding Jenkins repo list to the server -->
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+
+<!-- Installing Jenkins -->
+sudo apt install jenkins
+
+<!-- Starting Jenkins -->
+sudo systemctl start jenkins
+
+<!-- Accessing Jenkins secret key -->
+cd /var/lib/jenkins
+sudo nano secrets/initialAdminPassword
+
+<!-- Renaming the server -->
+sudo docker rm --name apacheServer -d httpd
+
+<!-- Instaling Git on Ubuntu -->
+sudo apt install git
+
+<!-- Accessing the Apache Server bash -->
+sudo docker exec -ti apacheServer bash
+
+<!-- Moving the files built by Jenkins to the httpd folder for the server to run the files and assigning port 80 of VM to the port 80 of the Docker -->
+sudo docker run --name apache -d -v /var/lib/jenkins/workspace/Jarvis-CarAdverts:/usr/local/apache2/htdocs/ -p 80:80 httpd:latest
+
+<!-- Jenkins execute shell build code -->
+#!/bin/bash
+if [ "(docker inspect -f '{{.State.Running}}' apache) = true" ]; then
+		docker rm  -f apache
+fi
+docker build -t httpd:latest .
+docker run --name apache -d -v /var/lib/jenkins/workspace/Jarvis-CarAdverts:/usr/local/apache2/htdocs/ -p 80:80 httpd:latest
+
+
